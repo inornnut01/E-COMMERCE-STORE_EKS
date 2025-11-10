@@ -1,0 +1,103 @@
+version: "3.8"
+
+services:
+  # MongoDB
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "echo 'db.runCommand({ ping: 1 }).ok' | mongosh mongodb://localhost:27017/test --quiet",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    environment:
+      MONGO_URI: ${MONGO_URI}
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    environment:
+      UPSTASH_REDIS_URL: ${UPSTASH_REDIS_URL}
+
+  # Backend API
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/backend/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=${PORT}
+      - MONGO_URI=${MONGO_URI}
+      - UPSTASH_REDIS_URL=${UPSTASH_REDIS_URL}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - CLIENT_URL=${CLIENT_URL}
+      - NODE_ENV=${NODE_ENV}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - SQS_ORDER_QUEUE_URL=${SQS_ORDER_QUEUE_URL}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../backend:/app/backend
+    command: ["npm", "run", "start"]
+
+  # Order Processor Worker
+  order-processor:
+    build:
+      context: ..
+      dockerfile: docker/backend/Dockerfile
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - MONGO_URI=${MONGO_URI}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - SQS_ORDER_QUEUE_URL=${SQS_ORDER_QUEUE_URL}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../backend:/app/backend
+    command: ["npm", "run", "worker"]
+
+  # Frontend
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/frontend/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
+  redis_data:
