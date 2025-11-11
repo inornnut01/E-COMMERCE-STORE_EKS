@@ -40,3 +40,8 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 terraform.rc
+
+# Kubernetes Secrets
+infrastructure/kubernetes/*-secrets.yaml
+!infrastructure/kubernetes/*-secrets.yaml.example
+!infrastructure/kubernetes/*-secrets.yaml.template

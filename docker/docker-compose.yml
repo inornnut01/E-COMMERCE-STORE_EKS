@@ -71,7 +71,7 @@ services:
   order-processor:
     build:
       context: ..
-      dockerfile: docker/backend/Dockerfile
+      dockerfile: docker/order-processor/Dockerfile
     environment:
       - NODE_ENV=${NODE_ENV}
       - MONGO_URI=${MONGO_URI}
