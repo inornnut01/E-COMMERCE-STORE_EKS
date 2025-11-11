@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-processor
+  namespace: e-commerce-store
+  labels:
+    app: order-processor
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-processor
+  template:
+    metadata:
+      labels:
+        app: order-processor
+    spec:
+      containers:
+        - name: order-processor
+          image: 875136960360.dkr.ecr.us-east-1.amazonaws.com/e-commerce-store/order-processor
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secrets
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+      terminationGracePeriodSeconds: 60
