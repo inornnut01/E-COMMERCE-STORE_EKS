@@ -18,10 +18,10 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 875136960360.dkr.ecr.us-east-1.amazonaws.com/e-commerce-store/frontend
+          image: 875136960360.dkr.ecr.us-east-1.amazonaws.com/e-commerce-store/frontend:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: http
           resources:
             requests:
@@ -33,7 +33,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -41,7 +41,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /
-              port: 80
+              port: 8080
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3

@@ -38,9 +38,6 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "200m"
-          volumeMounts:
-            - name: redis-data
-              mountPath: /data
           livenessProbe:
             tcpSocket:
               port: 6379
@@ -59,11 +56,3 @@ spec:
             timeoutSeconds: 3
             successThreshold: 1
             failureThreshold: 3
-  volumeClaimTemplates:
-    - metadata:
-        name: redis-data
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 5Gi

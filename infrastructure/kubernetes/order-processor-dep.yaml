@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: order-processor
-          image: 875136960360.dkr.ecr.us-east-1.amazonaws.com/e-commerce-store/order-processor
+          image: 875136960360.dkr.ecr.us-east-1.amazonaws.com/e-commerce-store/order-processor:latest
           imagePullPolicy: Always
           envFrom:
             - configMapRef:

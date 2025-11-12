@@ -7,6 +7,6 @@ data:
   PORT: "3000"
   NODE_ENV: "production"
   AWS_REGION: "us-east-1"
-  CLIENT_URL: "http://localhost:5173"
+  CLIENT_URL: "https://kubeecommerce.guyfreedive.xyz" ## check when production
   SQS_ORDER_QUEUE_URL: "https://sqs.us-east-1.amazonaws.com/875136960360/orders-queue"
   CLOUDINARY_CLOUD_NAME: "dbecfagg3"

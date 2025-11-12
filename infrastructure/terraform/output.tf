@@ -22,3 +22,8 @@ output "region" {
   description = "Amazon Web Service EKS Cluster region"
   value       = var.aws_region
 }
+
+output "eks_oidc_provider_arn" {
+  description = "OIDC Provider ARN for EKS cluster"
+  value       = module.eks.oidc_provider_arn
+}
