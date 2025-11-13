@@ -63,10 +63,6 @@ alb-controller-status: ## Check ALB Controller status
 	kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller --tail=50
 
 # ==================== Application Deployment ====================
-deploy-redis: k8s-config ## Deploy Redis
-	kubectl apply -f $(K8S_DIR)/redis-statefulset.yaml
-	kubectl apply -f $(K8S_DIR)/redis-cip-service.yaml
-
 deploy-backend: k8s-config ## Deploy Backend
 	@echo "⚠️  Make sure to create backend-secrets.yaml first!"
 	kubectl apply -f $(K8S_DIR)/backend-secrets.yaml
@@ -86,7 +82,7 @@ deploy-ingress: k8s-config ## Deploy Ingress
 	kubectl apply -f $(K8S_DIR)/ingress.yaml
 
 # ==================== Complete Workflows ====================
-deploy-all: terraform-apply k8s-setup alb-controller deploy-redis deploy-backend deploy-frontend deploy-order-processor deploy-ingress ## Deploy everything (Terraform + K8s + Apps)
+deploy-all: terraform-apply k8s-setup alb-controller deploy-backend deploy-frontend deploy-order-processor deploy-ingress ## Deploy everything (Terraform + K8s + Apps)
 	@echo "✓ Complete deployment finished!"
 	@echo "Run 'make get-url' to get the application URL"
 
