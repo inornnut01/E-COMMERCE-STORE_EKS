@@ -44,3 +44,15 @@ variable "cluster_name" {
   type        = string
   default     = "e-commerce-eks-cluster"
 }
+
+variable "alarm_email" {
+  description = "Email address for alarm notifications"
+  type        = string
+  default     = "inornnut01@gmail.com"
+}
+
+variable "enable_alb_monitoring" {
+  description = "Enable ALB monitoring alarms (requires ALB to be deployed first)"
+  type        = bool
+  default     = false
+}

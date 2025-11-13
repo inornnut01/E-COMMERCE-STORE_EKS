@@ -13,8 +13,8 @@ module "eks" {
 
   eks_managed_node_group_defaults = {
     ami_type = "AL2_x86_64"
-    
-    
+
+
     iam_role_additional_policies = {
       AmazonEC2ContainerRegistryReadOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
     }
@@ -46,4 +46,12 @@ module "eks" {
     Environment = var.environment
     Project     = var.project_name
   }
+}
+
+# Cloudwatch Observability
+resource "aws_eks_addon" "cloudwatch_observability" {
+  cluster_name = module.eks.cluster_name
+  addon_name   = "amazon-cloudwatch-observability"
+
+  depends_on = [module.eks]
 }
