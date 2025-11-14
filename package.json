@@ -6,7 +6,8 @@
     "dev": "nodemon backend/server.js",
     "start": "node backend/server.js",
     "worker": "node backend/workers/orderProcessor.js",
-    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "type": "module",
   "keywords": [],
@@ -26,6 +27,9 @@
     "stripe": "^16.8.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "mongodb-memory-server": "^9.1.3"
   }
 }
