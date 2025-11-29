@@ -1,0 +1,49 @@
+name: CI/CD project
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      #Backend Tests
+      - name: Install Backend Dependencies
+        run: npm install
+
+      - name: Run Backend Tests
+        run: npm run test -- --coverage
+
+      #Frontend Tests
+      - name: Install Frontend Dependencies
+        run: npm install --prefix frontend
+
+      - name: Run Frontend Tests
+        run: npm run test:run --prefix frontend -- --coverage
+
+      # SonarQube Analysis
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=mean-ecommerce-eks
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info,frontend/coverage/lcov.info
+            -Dsonar.sources=backend,frontend/src
+            -Dsonar.tests=backend/test,frontend/src/**/__tests__
+            -Dsonar.exclusions=**/node_modules/**,**/coverage/**
