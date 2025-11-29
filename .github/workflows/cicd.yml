@@ -49,3 +49,5 @@ jobs:
             -Dsonar.tests=backend/test,frontend/src/stores/__tests__
             -Dsonar.exclusions=**/node_modules/**,**/coverage/**
             -Dsonar.test.inclusions=**/*.test.js,**/*.test.jsx
+
+#TODO: Add test.exclusions for frontend
