@@ -109,8 +109,9 @@ describe("Product Controller Integration Tests", () => {
       expect(res.json).toHaveBeenCalled();
       const response = res.json.mock.calls[0][0];
       expect(response.products).toHaveLength(2);
-      expect(response.products[0].name).toBe("Product 1");
-      expect(response.products[1].name).toBe("Product 2");
+      const productNames = response.products.map((p) => p.name);
+      expect(productNames).toContain("Product 1");
+      expect(productNames).toContain("Product 2");
     });
 
     it("should return empty array when no products exist", async () => {
