@@ -42,7 +42,8 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           args: >
-            -Dsonar.projectKey=mean-ecommerce-eks
+            -Dsonar.projectKey=inornnut01_E-COMMERCE-STORE_EKS
+            -Dsonar.organization=inornnut01
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info,frontend/coverage/lcov.info
             -Dsonar.sources=backend,frontend/src
             -Dsonar.tests=backend/test,frontend/src/**/__tests__
