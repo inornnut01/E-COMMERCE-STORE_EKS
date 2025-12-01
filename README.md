@@ -2,7 +2,7 @@
 
 A full-stack e-commerce application deployed on AWS EKS (Elastic Kubernetes Service) with complete CI/CD pipeline, Infrastructure as Code, and cloud-native monitoring.
 
-![Application Screenshot](frontend/public/screenshot-for-readme.png)
+![Application Screenshot](frontend/public/front-web.png)
 
 ## Architecture
 
