@@ -9,7 +9,7 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REGISTRY: 875136960360.dkr.ecr.us-east-1.amazonaws.com
-  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+  EKS_CLUSTER_NAME: e-commerce-eks-cluster
 
 jobs:
   # ============================================
@@ -65,6 +65,7 @@ jobs:
     name: Build & Push Images
     runs-on: ubuntu-latest
     needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - uses: actions/checkout@v4
@@ -107,51 +108,51 @@ jobs:
   # ============================================
   # Job 3: Deploy to EKS
   # ============================================
-  # deploy:
-  #   name: Deploy to EKS
-  #   runs-on: ubuntu-latest
-  #   needs: build-and-push
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  deploy:
+    name: Deploy to EKS
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Configure AWS Credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-  #     - name: Update kubeconfig
-  #       run: |
-  #         aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
-  #     - name: Deploy Backend
-  #       run: |
-  #         kubectl set image deployment/backend \
-  #           backend=${{ env.ECR_REGISTRY }}/e-commerce-store/backend:${{ github.sha }} \
-  #           -n e-commerce-store
-  #         kubectl rollout status deployment/backend -n e-commerce-store --timeout=300s
+      - name: Deploy Backend
+        run: |
+          kubectl set image deployment/backend \
+            backend=${{ env.ECR_REGISTRY }}/e-commerce-store/backend:${{ github.sha }} \
+            -n e-commerce-store
+          kubectl rollout status deployment/backend -n e-commerce-store --timeout=300s
 
-  #     - name: Deploy Frontend
-  #       run: |
-  #         kubectl set image deployment/frontend \
-  #           frontend=${{ env.ECR_REGISTRY }}/e-commerce-store/frontend:${{ github.sha }} \
-  #           -n e-commerce-store
-  #         kubectl rollout status deployment/frontend -n e-commerce-store --timeout=300s
+      - name: Deploy Frontend
+        run: |
+          kubectl set image deployment/frontend \
+            frontend=${{ env.ECR_REGISTRY }}/e-commerce-store/frontend:${{ github.sha }} \
+            -n e-commerce-store
+          kubectl rollout status deployment/frontend -n e-commerce-store --timeout=300s
 
-  #     - name: Deploy Order Processor
-  #       run: |
-  #         kubectl set image deployment/order-processor \
-  #           order-processor=${{ env.ECR_REGISTRY }}/e-commerce-store/order-processor:${{ github.sha }} \
-  #           -n e-commerce-store
-  #         kubectl rollout status deployment/order-processor -n e-commerce-store --timeout=300s
+      - name: Deploy Order Processor
+        run: |
+          kubectl set image deployment/order-processor \
+            order-processor=${{ env.ECR_REGISTRY }}/e-commerce-store/order-processor:${{ github.sha }} \
+            -n e-commerce-store
+          kubectl rollout status deployment/order-processor -n e-commerce-store --timeout=300s
 
-  #     - name: Verify Deployment
-  #       run: |
-  #         echo "=== Deployment Status ==="
-  #         kubectl get deployments -n e-commerce-store
-  #         echo ""
-  #         echo "=== Pod Status ==="
-  #         kubectl get pods -n e-commerce-store
+      - name: Verify Deployment
+        run: |
+          echo "=== Deployment Status ==="
+          kubectl get deployments -n e-commerce-store
+          echo ""
+          echo "=== Pod Status ==="
+          kubectl get pods -n e-commerce-store

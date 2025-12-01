@@ -1,0 +1,91 @@
+name: Terraform Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action to perform"
+        required: true
+        default: "plan"
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+      confirm_destroy:
+        description: "Type 'DESTROY' to confirm destruction (required for destroy action)"
+        required: false
+        type: string
+        default: ""
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
+
+jobs:
+  terraform:
+    name: Terraform ${{ github.event.inputs.action }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infrastructure/terraform
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        if: github.event.inputs.action == 'plan' || github.event.inputs.action == 'apply'
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        run: terraform apply -auto-approve tfplan
+
+      - name: Validate Destroy Confirmation
+        if: github.event.inputs.action == 'destroy'
+        run: |
+          if [ "${{ github.event.inputs.confirm_destroy }}" != "DESTROY" ]; then
+            echo "❌ ERROR: You must type 'DESTROY' to confirm destruction"
+            exit 1
+          fi
+          echo "✅ Destroy confirmed"
+
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy' && github.event.inputs.confirm_destroy == 'DESTROY'
+        run: terraform destroy -auto-approve
+
+      # Show outputs after apply
+      - name: Show Infrastructure Summary
+        if: github.event.inputs.action == 'apply'
+        run: |
+          echo "========================================="
+          echo "🚀 Infrastructure Created Successfully!"
+          echo "========================================="
+          terraform output
+          echo ""
+          echo "📝 Next Steps:"
+          echo "1. Configure kubectl: aws eks update-kubeconfig --name \$(terraform output -raw cluster_name) --region ${{ env.AWS_REGION }}"
+          echo "2. Apply Kubernetes manifests from infrastructure/kubernetes/"
+          echo "3. Push to main branch to trigger application deployment"
